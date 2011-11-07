@@ -1,0 +1,3 @@
+[37.780989640000001, -122.4044916]	1	2011-08-30 17:51:59	When demo'ing your product, real-looking data is imperative. "asdf lkjh qwerty" makes your product look sloppy and unprofessional. #df11
+[34.023666900000002, -86.027908499999995]	3	2011-09-01 12:09:44	Whew tired. Asdf.
+[31.85918715, -106.54740255]	4	2011-09-09 00:40:15	Asdf

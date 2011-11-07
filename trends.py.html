@@ -1,0 +1,284 @@
+<html>
+<head>
+<title>trends.py</title>
+</head>
+
+<body>
+<h3>trends.py (<a href="trends.py">plain text</a>)</h3>
+<hr>
+<pre>
+<span style="color: darkred">"""Visualizing Twitter Sentiment Across America"""
+
+</span><span style="color: blue; font-weight: bold">import </span>string
+<span style="color: blue; font-weight: bold">from </span>data <span style="color: blue; font-weight: bold">import </span>word_sentiments<span style="font-weight: bold">, </span>load_tweets
+<span style="color: blue; font-weight: bold">from </span>geo <span style="color: blue; font-weight: bold">import </span>us_states<span style="font-weight: bold">, </span>geo_distance<span style="font-weight: bold">, </span>make_position<span style="font-weight: bold">, </span>longitude<span style="font-weight: bold">, </span>latitude
+<span style="color: blue; font-weight: bold">from </span>maps <span style="color: blue; font-weight: bold">import </span>draw_state<span style="font-weight: bold">, </span>draw_name<span style="font-weight: bold">, </span>draw_dot<span style="font-weight: bold">, </span>wait
+<span style="color: blue; font-weight: bold">from </span>ucb <span style="color: blue; font-weight: bold">import </span>main<span style="font-weight: bold">, </span>trace<span style="font-weight: bold">, </span>interact<span style="font-weight: bold">, </span>log_current_line
+
+
+<span style="color: green; font-style: italic"># Phase 1: The feelings in tweets
+
+</span><span style="color: blue; font-weight: bold">def </span>make_tweet<span style="font-weight: bold">(</span>text<span style="font-weight: bold">, </span>time<span style="font-weight: bold">, </span>lat<span style="font-weight: bold">, </span>lon<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a tweet, represented as a python dictionary.    
+
+    text -- A string; the text of the tweet, all in lowercase
+    time -- A datetime object; the time that the tweet was posted
+    lat -- A number; the latitude of the tweet's location
+    lon -- A number; the longitude of the tweet's location
+    """
+    </span><span style="color: blue; font-weight: bold">return </span><span style="font-weight: bold">{</span><span style="color: red">'text'</span><span style="font-weight: bold">: </span>text<span style="font-weight: bold">, </span><span style="color: red">'time'</span><span style="font-weight: bold">: </span>time<span style="font-weight: bold">, </span><span style="color: red">'latitude'</span><span style="font-weight: bold">: </span>lat<span style="font-weight: bold">, </span><span style="color: red">'longitude'</span><span style="font-weight: bold">: </span>lon<span style="font-weight: bold">}
+
+</span><span style="color: blue; font-weight: bold">def </span>tweet_words<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a list of words in the tweet.
+    
+    Arguments:
+    tweet -- a tweet abstract data type.
+    
+    Return 1 value:
+     - The list of words in the tweet.
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+</span><span style="color: blue; font-weight: bold">def </span>tweet_location<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a position (see geo.py) that represents the tweet's location."""
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+</span><span style="color: blue; font-weight: bold">def </span>tweet_string<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a string representing the tweet."""
+    </span><span style="color: blue; font-weight: bold">return </span><span style="color: red">'"{0}" @ {1}'</span><span style="font-weight: bold">.</span>format<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">[</span><span style="color: red">'text'</span><span style="font-weight: bold">], </span>tweet_location<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">))
+
+</span><span style="color: blue; font-weight: bold">def </span>extract_words<span style="font-weight: bold">(</span>text<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return the words in a tweet, not including punctuation.
+
+    &gt;&gt;&gt; extract_words('anything else.....not my job')
+    ['anything', 'else', 'not', 'my', 'job']
+    &gt;&gt;&gt; extract_words('i love my job. #winning')
+    ['i', 'love', 'my', 'job', 'winning']
+    &gt;&gt;&gt; extract_words('make justin # 1 by tweeting #vma #justinbieber :)')
+    ['make', 'justin', 'by', 'tweeting', 'vma', 'justinbieber']
+    &gt;&gt;&gt; extract_words("paperclips! they're so awesome, cool, &amp; useful!")
+    ['paperclips', 'they', 're', 'so', 'awesome', 'cool', 'useful']
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span><span style="color: blue; font-weight: bold">return </span>text<span style="font-weight: bold">.</span>split<span style="font-weight: bold">()
+
+</span><span style="color: blue; font-weight: bold">def </span>get_word_sentiment<span style="font-weight: bold">(</span>word<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a number between -1 and +1 representing the degree of positive or
+    negative feeling in the given word. 
+
+    Return None if the word is not in the sentiment dictionary.
+    (0 represents a neutral feeling, not an unknown feeling.)
+    
+    &gt;&gt;&gt; get_word_sentiment('good')
+    0.875
+    &gt;&gt;&gt; get_word_sentiment('bad')
+    -0.625
+    &gt;&gt;&gt; get_word_sentiment('winning')
+    0.5
+    &gt;&gt;&gt; get_word_sentiment('Berkeley')  # Returns None
+    """
+    </span><span style="color: blue; font-weight: bold">return </span>word_sentiments<span style="font-weight: bold">.</span>get<span style="font-weight: bold">(</span>word<span style="font-weight: bold">, </span><span style="color: blue">None</span><span style="font-weight: bold">)
+
+</span><span style="color: blue; font-weight: bold">def </span>analyze_tweet_sentiment<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">):
+    </span><span style="color: darkred">""" Return a number between -1 and +1 representing the degree of positive or
+    negative sentiment in the given tweet, averaging over all the words in the
+    tweet that have a sentiment score. 
+
+    If there are words that don't have a sentiment score, leave them 
+    out of the calculation. 
+
+    If no words in the tweet have a sentiment score, return None.
+    (do not return 0, which represents neutral sentiment).
+
+    &gt;&gt;&gt; positive = make_tweet('i love my job. #winning', None, 0, 0)
+    &gt;&gt;&gt; round(analyze_tweet_sentiment(positive), 5)
+    0.29167
+    &gt;&gt;&gt; negative = make_tweet("Thinking, 'I hate my job'", None, 0, 0)
+    &gt;&gt;&gt; analyze_tweet_sentiment(negative)
+    -0.25
+    &gt;&gt;&gt; no_sentiment = make_tweet("Go bears!", None, 0, 0)
+    &gt;&gt;&gt; analyze_tweet_sentiment(no_sentiment)
+    """
+    </span>average <span style="font-weight: bold">= </span><span style="color: blue">None
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span><span style="color: blue; font-weight: bold">return </span>average
+
+@main
+<span style="color: blue; font-weight: bold">def </span>print_sentiment<span style="font-weight: bold">(</span>text<span style="font-weight: bold">=</span><span style="color: red">'Are you virtuous or verminous?'</span><span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Print the words in text, annotated by their sentiment scores.
+
+    For example, to print each word of a sentence with its sentiment:
+
+    # python3 trends.py "computer science is my favorite!"
+    """
+    </span>words <span style="font-weight: bold">= </span>extract_words<span style="font-weight: bold">(</span>text<span style="font-weight: bold">.</span>lower<span style="font-weight: bold">())
+    </span><span style="color: blue; font-weight: bold">assert </span>words<span style="font-weight: bold">, </span><span style="color: red">'No words extracted from "' </span><span style="font-weight: bold">+ </span>text <span style="font-weight: bold">+ </span><span style="color: red">'"'
+    </span>layout <span style="font-weight: bold">= </span><span style="color: red">'{0:&gt;' </span><span style="font-weight: bold">+ </span>str<span style="font-weight: bold">(</span>len<span style="font-weight: bold">(</span>max<span style="font-weight: bold">(</span>words<span style="font-weight: bold">, </span>key<span style="font-weight: bold">=</span>len<span style="font-weight: bold">))) + </span><span style="color: red">'}: {1}'
+    </span><span style="color: blue; font-weight: bold">for </span>word <span style="color: blue; font-weight: bold">in </span>extract_words<span style="font-weight: bold">(</span>text<span style="font-weight: bold">.</span>lower<span style="font-weight: bold">()):
+        </span><span style="color: blue; font-weight: bold">print</span><span style="font-weight: bold">(</span>layout<span style="font-weight: bold">.</span>format<span style="font-weight: bold">(</span>word<span style="font-weight: bold">, </span>get_word_sentiment<span style="font-weight: bold">(</span>word<span style="font-weight: bold">)))
+        
+
+</span><span style="color: green; font-style: italic"># Phase 2: The geometry of maps
+
+</span><span style="color: blue; font-weight: bold">def </span>find_centroid<span style="font-weight: bold">(</span>polygon<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Find the centroid of a polygon.
+
+    http://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
+    
+    polygon -- A list of positions, in which the first and last are the same
+
+    Returns: 3 numbers; centroid latitude, centroid longitude, and polygon area
+
+    Hint: If a polygon has 0 area, return its first position as its centroid
+
+    &gt;&gt;&gt; p1, p2, p3 = make_position(1, 2), make_position(3, 4), make_position(5, 0)
+    &gt;&gt;&gt; triangle = [p1, p2, p3, p1]  # First vertex is also the last vertex
+    &gt;&gt;&gt; find_centroid(triangle)
+    (3.0, 2.0, 6.0)
+    &gt;&gt;&gt; find_centroid([p1, p3, p2, p1])
+    (3.0, 2.0, 6.0)
+    &gt;&gt;&gt; find_centroid([p1, p2, p1])
+    (1, 2, 0)
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+</span><span style="color: blue; font-weight: bold">def </span>find_center<span style="font-weight: bold">(</span>shapes<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Compute the geographic center of a state, averaged over its shapes.
+
+    The center is the average position of centroids of the polygons in shapes,
+    weighted by the area of those polygons.
+    
+    Arguments:
+    shapes -- a list of polygons
+
+    &gt;&gt;&gt; ca = find_center(us_states['CA'])  # California
+    &gt;&gt;&gt; round(latitude(ca), 5)
+    37.25389
+    &gt;&gt;&gt; round(longitude(ca), 5)
+    -119.61439
+
+    &gt;&gt;&gt; hi = find_center(us_states['HI'])  # Hawaii
+    &gt;&gt;&gt; round(latitude(hi), 5)
+    20.1489
+    &gt;&gt;&gt; round(longitude(hi), 5)
+    -156.21763
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+
+</span><span style="color: green; font-style: italic"># Uncomment this decorator during Phase 2.
+# @main
+</span><span style="color: blue; font-weight: bold">def </span>draw_centered_map<span style="font-weight: bold">(</span>center_state<span style="font-weight: bold">=</span><span style="color: red">'TX'</span><span style="font-weight: bold">, </span>n<span style="font-weight: bold">=</span><span style="color: red">10</span><span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Draw the n states closest to center_state.
+    
+    For example, to draw the 20 states closest to California (including California):
+
+    # python3 trends.py CA 20
+    """
+    </span>us_centers <span style="font-weight: bold">= {</span>n<span style="font-weight: bold">: </span>find_center<span style="font-weight: bold">(</span>s<span style="font-weight: bold">) </span><span style="color: blue; font-weight: bold">for </span>n<span style="font-weight: bold">, </span>s <span style="color: blue; font-weight: bold">in </span>us_states<span style="font-weight: bold">.</span>items<span style="font-weight: bold">()}
+    </span>center <span style="font-weight: bold">= </span>us_centers<span style="font-weight: bold">[</span>center_state<span style="font-weight: bold">.</span>upper<span style="font-weight: bold">()]
+    </span>dist_from_center <span style="font-weight: bold">= </span><span style="color: blue; font-weight: bold">lambda </span>name<span style="font-weight: bold">: </span>geo_distance<span style="font-weight: bold">(</span>center<span style="font-weight: bold">, </span>us_centers<span style="font-weight: bold">[</span>name<span style="font-weight: bold">])
+    </span><span style="color: blue; font-weight: bold">for </span>name <span style="color: blue; font-weight: bold">in </span>sorted<span style="font-weight: bold">(</span>us_states<span style="font-weight: bold">.</span>keys<span style="font-weight: bold">(), </span>key<span style="font-weight: bold">=</span>dist_from_center<span style="font-weight: bold">)[:</span>int<span style="font-weight: bold">(</span>n<span style="font-weight: bold">)]:
+        </span>draw_state<span style="font-weight: bold">(</span>us_states<span style="font-weight: bold">[</span>name<span style="font-weight: bold">])
+        </span>draw_name<span style="font-weight: bold">(</span>name<span style="font-weight: bold">, </span>us_centers<span style="font-weight: bold">[</span>name<span style="font-weight: bold">])
+    </span>draw_dot<span style="font-weight: bold">(</span>center<span style="font-weight: bold">, </span><span style="color: red">1</span><span style="font-weight: bold">, </span><span style="color: red">10</span><span style="font-weight: bold">)  </span><span style="color: green; font-style: italic"># Mark the center state with a red dot
+    </span>wait<span style="font-weight: bold">()
+
+
+</span><span style="color: green; font-style: italic"># Phase 3: The mood of the nation
+
+</span><span style="color: blue; font-weight: bold">def </span>find_closest_state<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">, </span>state_centers<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return the name of the state closest to the given tweet's location.
+    
+    Use the geo_distance function (already provided) to calculate distance 
+    in miles between two latitude-longitude positions.
+
+    Arguments:
+    tweet -- a tweet abstract data type
+    state_centers -- a dictionary from state names to state shapes
+
+    &gt;&gt;&gt; us_centers = {n: find_center(s) for n, s in us_states.items()}
+    &gt;&gt;&gt; sf = make_tweet("Welcome to San Francisco", None, 38, -122)
+    &gt;&gt;&gt; ny = make_tweet("Welcome to New York", None, 41, -74)
+    &gt;&gt;&gt; find_closest_state(sf, us_centers)
+    'CA'
+    &gt;&gt;&gt; find_closest_state(ny, us_centers)
+    'NJ'
+    """
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+
+</span><span style="color: blue; font-weight: bold">def </span>group_tweets_by_state<span style="font-weight: bold">(</span>tweets<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Return a dictionary that aggregates tweets by their nearest state center.
+
+    The keys of the returned dictionary are state names, and the values are
+    lists of tweets that appear closer to that state center than any other.
+    
+    tweets -- a sequence of tweet abstract data types    
+
+    &gt;&gt;&gt; sf = make_tweet("Welcome to San Francisco", None, 38, -122)
+    &gt;&gt;&gt; ny = make_tweet("Welcome to New York", None, 41, -74)
+    &gt;&gt;&gt; ca_tweets = group_tweets_by_state([sf, ny])['CA']
+    &gt;&gt;&gt; tweet_string(ca_tweets[0])
+    '"Welcome to San Francisco" @ (38, -122)'
+    """
+    </span>tweets_by_state <span style="font-weight: bold">= {}
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span><span style="color: blue; font-weight: bold">return </span>tweets_by_state
+
+<span style="color: blue; font-weight: bold">def </span>calculate_average_sentiments<span style="font-weight: bold">(</span>tweets_by_state<span style="font-weight: bold">):
+    </span><span style="color: darkred">"""Calculate the average sentiment of the states by averaging over all 
+    the tweets from each state. Return the result as a dictionary from state
+    names to average sentiment values.
+   
+    If a state has no tweets with sentiment values, leave it out of the
+    dictionary entirely.  Do not include a states with no tweets, or with tweets
+    that have no sentiment, as 0.  0 represents neutral sentiment, not unknown
+    sentiment.
+
+    tweets_by_state -- A dictionary from state names to lists of tweets
+    """
+    </span>averaged_state_sentiments <span style="font-weight: bold">= {}
+    </span><span style="color: red">"*** YOUR CODE HERE ***"
+    </span><span style="color: blue; font-weight: bold">return </span>averaged_state_sentiments
+
+<span style="color: blue; font-weight: bold">def </span>draw_state_sentiments<span style="font-weight: bold">(</span>state_sentiments<span style="font-weight: bold">={}):
+    </span><span style="color: darkred">"""Draw all U.S. states in colors corresponding to their sentiment value.
+    
+    Unknown state names are ignored; states without values are colored grey.
+    
+    state_sentiments -- A dictionary from state strings to sentiment values
+    """
+    </span><span style="color: blue; font-weight: bold">for </span>name<span style="font-weight: bold">, </span>shapes <span style="color: blue; font-weight: bold">in </span>us_states<span style="font-weight: bold">.</span>items<span style="font-weight: bold">():
+        </span>sentiment <span style="font-weight: bold">= </span>state_sentiments<span style="font-weight: bold">.</span>get<span style="font-weight: bold">(</span>name<span style="font-weight: bold">, </span><span style="color: blue">None</span><span style="font-weight: bold">)
+        </span>draw_state<span style="font-weight: bold">(</span>shapes<span style="font-weight: bold">, </span>sentiment<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">for </span>name<span style="font-weight: bold">, </span>shapes <span style="color: blue; font-weight: bold">in </span>us_states<span style="font-weight: bold">.</span>items<span style="font-weight: bold">():
+        </span>center <span style="font-weight: bold">= </span>find_center<span style="font-weight: bold">(</span>shapes<span style="font-weight: bold">)
+        </span><span style="color: blue; font-weight: bold">if </span>center <span style="color: blue; font-weight: bold">is not </span><span style="color: blue">None</span><span style="font-weight: bold">:
+            </span>draw_name<span style="font-weight: bold">(</span>name<span style="font-weight: bold">, </span>center<span style="font-weight: bold">)
+
+</span><span style="color: green; font-style: italic"># Uncomment this decorator during Phase 3.
+# @main
+</span><span style="color: blue; font-weight: bold">def </span>draw_map_for_term<span style="font-weight: bold">(</span>term<span style="font-weight: bold">=</span><span style="color: red">'my job'</span><span style="font-weight: bold">):
+    </span><span style="color: darkred">"""
+    Draw the sentiment map corresponding to the tweets that match term.
+    
+    term -- a word or phrase to filter the tweets by.  
+    
+    To visualize tweets containing the word "obama":
+    
+    # python3 trends.py obama
+    
+    Some term suggestions:
+    New York, Texas, sandwich, my life, justinbieber
+    """
+    </span>tweets <span style="font-weight: bold">= </span>load_tweets<span style="font-weight: bold">(</span>make_tweet<span style="font-weight: bold">, </span>term<span style="font-weight: bold">)
+    </span>tweets_by_state <span style="font-weight: bold">= </span>group_tweets_by_state<span style="font-weight: bold">(</span>tweets<span style="font-weight: bold">)
+    </span>state_sentiments <span style="font-weight: bold">= </span>calculate_average_sentiments<span style="font-weight: bold">(</span>tweets_by_state<span style="font-weight: bold">)
+    </span>draw_state_sentiments<span style="font-weight: bold">(</span>state_sentiments<span style="font-weight: bold">)
+    </span><span style="color: blue; font-weight: bold">for </span>tweet <span style="color: blue; font-weight: bold">in </span>tweets<span style="font-weight: bold">:
+        </span>draw_dot<span style="font-weight: bold">(</span>tweet_location<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">), </span>analyze_tweet_sentiment<span style="font-weight: bold">(</span>tweet<span style="font-weight: bold">))
+    </span>wait<span style="font-weight: bold">()
+</span>
+</pre>
+</body>
+</html>
